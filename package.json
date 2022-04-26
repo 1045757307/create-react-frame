@@ -1,0 +1,21 @@
+{
+  "name": "create-react-frame",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "create-module": "bin/index.js"
+  },
+  "scripts": {
+    "test": "node bin/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.0.1",
+    "execa": "^6.1.0",
+    "fs-extra": "^10.1.0",
+    "inquirer": "^8.2.2"
+  }
+}
