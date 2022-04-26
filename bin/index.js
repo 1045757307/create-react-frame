@@ -8,77 +8,47 @@ import { execaSync, execa } from 'execa';
 import ora from 'ora';
 import fse from 'fs-extra';
 
-import questions from '../questions/index.js';
-import { getTemplatesDirRootPath } from '../utils/index.js';
-
-// 存放模板文件的目录路径
-const templatesDirRootPath = getTemplatesDirRootPath();
-console.log(chalk.blue('存放模板文件的目录路径:'), templatesDirRootPath);
+import questions from './questions/index.js';
 
 // 交互命令行输入的值
-const config = await questions(templatesDirRootPath);
+const config = await questions();
 console.log(chalk.blue('config：'), config);
 
-// 先创建目标目录，检查用户输入的目录是否已存在
-fs.mkdirSync(`./${config.createDir}`);
-if (!fs.existsSync(templatesDirRootPath)) {
-  fs.mkdirSync(templatesDirRootPath);
-}
+// 创建的项目路径
+const projectPath = `./${config.packageName}`;
+// 存放模板文件的目录路径
+const templatesDirRootPath = `${projectPath}/templatesModulesDir`;
 
-// 获取远程仓库目录名称
-const getGitRemoteFilename = () => {
-  const arr = config.remoteUrl.split('/');
-  return arr[arr.length - 1].split('.')[0];
-};
+// 1. 先创建目标目录和模板文件临时目录
+console.log(chalk.green(`根据packageName创建文件夹 -> ${projectPath}`));
+fs.mkdirSync(projectPath);
+fs.mkdirSync(templatesDirRootPath);
 
-// 远程仓库目录名称
-const gitRemoteFilename = getGitRemoteFilename();
-console.log(chalk.blue('gitRemoteFilename:'), gitRemoteFilename);
-
+// 2. 获取远程仓库模板文件代码，存放到临时目录
 let getGitRemoteResult = {}; // 拉取远程仓库结果
-
-// 获取远程仓库代码
 const getGitRemote = () => {
-  // 该远程仓库是否已经存在于本地
-  const exist = fs.existsSync(
-    `${templatesDirRootPath}/${gitRemoteFilename}/.git`
-  );
-
   const spinners = [ora('读取中...')];
   spinners[0].start();
 
-  if (exist) {
-    // 存在，则 git pull
-    getGitRemoteResult = execaSync(`git`, ['config', 'pull.rebase', 'false'], {
-      cwd: `${templatesDirRootPath}/${gitRemoteFilename}`,
-    });
-    getGitRemoteResult = execaSync(`git`, ['pull'], {
-      cwd: `${templatesDirRootPath}/${gitRemoteFilename}`,
-    });
-  } else {
-    // 不存在，则 git clone
-    try {
-      getGitRemoteResult = execaSync(
-        `git`,
-        ['clone', '-b', 'master', config.remoteUrl],
-        {
-          cwd: templatesDirRootPath,
-        }
-      );
-    } catch (err) {
-      fs.rmdirSync(`./${config.createDir}`);
-      console.error(err);
-    }
+  try {
+    getGitRemoteResult = execaSync(
+      `git`,
+      [
+        'clone',
+        '-b',
+        'master',
+        'https://github.com/1045757307/front-react-frame.git',
+      ],
+      {
+        cwd: templatesDirRootPath,
+      }
+    );
+  } catch (err) {
+    fs.rmdirSync(projectPath);
+    console.error(err);
   }
 
-  fs.writeFile(
-    `${templatesDirRootPath}/defaultRemoteUrl.txt`,
-    config.remoteUrl,
-    (err) => {
-      if (err) console.log(err);
-    }
-  );
-  console.log(chalk.blue('getGitRemoteResult：'), getGitRemoteResult);
+  // console.log(chalk.blue('getGitRemoteResult：'), getGitRemoteResult);
   if (
     getGitRemoteResult.failed === true ||
     getGitRemoteResult.failed === undefined ||
@@ -92,30 +62,40 @@ const getGitRemote = () => {
 
 getGitRemote();
 
-/**
- * 进行copy
- */
+// 3. 把临时目录里的模板文件代码copy到项目中
 const fsCopy = () => {
+  const spinners = [ora('创建模块中...')];
+  spinners[0].start();
   try {
+    console.log(chalk.blue('copy模板文件代码'));
     fse.copy(
-      `${templatesDirRootPath}/${gitRemoteFilename}`,
-      `./${config.createDir}`,
+      `${templatesDirRootPath}/front-react-frame`,
+      `${projectPath}`,
       (err) => {
         if (err) {
           console.error(err);
         } else {
-          // git add 新创建的文件
-          execa(`git`, ['add', './'], { cwd: './' }, (err) => {
-            if (err) console.log(err);
-          });
-          console.log(chalk.green('创建模块成功！'));
+          delDir();
+          spinners[0].succeed('创建模块成功！');
         }
       }
     );
   } catch (err) {
-    fs.rmdir(`./${config.createDir}`);
+    fs.rmdirSync(projectPath);
     console.error(err);
   }
 };
 
 fsCopy();
+
+// 4. 删除模板文件中包含定制信息的代码
+const delDir = async () => {
+  console.log(chalk.red('删除模板文件中包含定制信息的代码'));
+
+  // 删除模板文件临时目录
+  await execa(`rm`, ['-rf', `${templatesDirRootPath}`], { cwd: './' });
+  // 删除.git文件夹
+  await execa(`rm`, ['-rf', `${projectPath}/.git`], { cwd: './' });
+  // 删除package-lock.json
+  await execa(`rm`, ['-rf', `${projectPath}/package-lock.json`], { cwd: './' });
+};
