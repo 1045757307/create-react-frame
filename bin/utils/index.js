@@ -7,7 +7,7 @@ import process from 'process';
 // 获取绝对路径
 export const getRootPath = (pathUrl) => {
   const __dirname = fileURLToPath(import.meta.url);
-  return path.resolve(__dirname, `../${pathUrl}`);
+  return path.resolve(__dirname, `../../${pathUrl}`);
 };
 
 // 设置模板缓存目录

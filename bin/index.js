@@ -9,18 +9,24 @@ import ora from 'ora';
 import fse from 'fs-extra';
 
 import questions from './questions/index.js';
+import packageJson from './template/package/index.js';
+import envFile from './template/env/index.js';
+import indexHtml from './template/indexHtml/index.js';
+import BasicLayout from './template/BasicLayout/index.js';
+import mainCompontent from './template/mainCompontent/index.js';
 
 // 交互命令行输入的值
 const config = await questions();
-console.log(chalk.blue('config：'), config);
+// console.log(chalk.blue('config：'), config);
+// console.log(chalk.blue('命令行参数：'), process.argv.slice(2));
 
 // 创建的项目路径
-const projectPath = `./${config.packageName}`;
+const projectPath = `./${config.createDir}`;
 // 存放模板文件的目录路径
 const templatesDirRootPath = `${projectPath}/templatesModulesDir`;
 
 // 1. 先创建目标目录和模板文件临时目录
-console.log(chalk.green(`根据packageName创建文件夹 -> ${projectPath}`));
+console.log(chalk.green(`根据createDir创建文件夹 -> ${projectPath}`));
 fs.mkdirSync(projectPath);
 fs.mkdirSync(templatesDirRootPath);
 
@@ -77,6 +83,7 @@ const fsCopy = () => {
         } else {
           delDir();
           spinners[0].succeed('创建模块成功！');
+          rewrite();
         }
       }
     );
@@ -88,9 +95,9 @@ const fsCopy = () => {
 
 fsCopy();
 
-// 4. 删除模板文件中包含定制信息的代码
+// 4. 删除模板文件中包含定制信息
 const delDir = async () => {
-  console.log(chalk.red('删除模板文件中包含定制信息的代码'));
+  console.log(chalk.red('删除模板文件中包含定制信息'));
 
   // 删除模板文件临时目录
   await execa(`rm`, ['-rf', `${templatesDirRootPath}`], { cwd: './' });
@@ -98,4 +105,38 @@ const delDir = async () => {
   await execa(`rm`, ['-rf', `${projectPath}/.git`], { cwd: './' });
   // 删除package-lock.json
   await execa(`rm`, ['-rf', `${projectPath}/package-lock.json`], { cwd: './' });
+};
+
+// 5. 重新写入部分文件
+const rewrite = async () => {
+  console.log(chalk.green('重新写入部分文件'));
+
+  await execa(`rm`, ['-rf', `${projectPath}/package.json`], { cwd: './' });
+  fs.writeFileSync(`${projectPath}/package.json`, packageJson(config));
+
+  await execa(`rm`, ['-rf', `${projectPath}/.env`], { cwd: './' });
+  fs.writeFileSync(`${projectPath}/.env`, envFile(config));
+
+  await execa(`rm`, ['-rf', `${projectPath}/public/index.html`], { cwd: './' });
+  fs.writeFileSync(`${projectPath}/public/index.html`, indexHtml(config));
+
+  await execa(
+    `rm`,
+    ['-rf', `${projectPath}/src/common/components/Layout/BasicLayout.jsx`],
+    { cwd: './' }
+  );
+  fs.writeFileSync(
+    `${projectPath}/src/common/components/Layout/BasicLayout.jsx`,
+    BasicLayout(config)
+  );
+
+  await execa(
+    `rm`,
+    ['-rf', `${projectPath}/src/common/components/Main/index.jsx`],
+    { cwd: './' }
+  );
+  fs.writeFileSync(
+    `${projectPath}/src/common/components/Main/index.jsx`,
+    mainCompontent(config)
+  );
 };
