@@ -69,12 +69,12 @@ const getGitRemote = () => {
 getGitRemote();
 
 // 3. 把临时目录里的模板文件代码copy到项目中
-const fsCopy = () => {
+const fsCopy = async () => {
   const spinners = [ora('创建模块中...')];
   spinners[0].start();
   try {
     console.log(chalk.blue('copy模板文件代码'));
-    fse.copy(
+    await fse.copy(
       `${templatesDirRootPath}/front-react-frame`,
       `${projectPath}`,
       (err) => {
