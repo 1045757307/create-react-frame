@@ -1,5 +1,5 @@
 {
-  "name": "create-react-frame",
+  "name": "create-react-frame-z",
   "version": "1.0.0",
   "description": "使用命令行工具一键搭建基于creact-react-app封装的自定义框架",
   "main": "bin/index.js",
@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/1045757307/create-react-frame#readme",
   "bin": {
-    "create-react-frame": "bin/index.js"
+    "create-react-frame-z": "bin/index.js"
   },
   "scripts": {
     "test": "node bin/index.js"
