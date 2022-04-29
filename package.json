@@ -1,16 +1,28 @@
 {
   "name": "create-react-frame",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "使用命令行工具一键搭建基于creact-react-app封装的自定义框架",
+  "main": "bin/index.js",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1045757307/create-react-frame.git"
+  },
+  "keywords": [
+    "create-react-app",
+    "nodejs"
+  ],
+  "bugs": {
+    "url": "https://github.com/1045757307/create-react-frame/issues"
+  },
+  "homepage": "https://github.com/1045757307/create-react-frame#readme",
   "bin": {
-    "create-module": "bin/index.js"
+    "create-react-frame": "bin/index.js"
   },
   "scripts": {
     "test": "node bin/index.js"
   },
-  "author": "",
+  "author": "lishasha_forever",
   "license": "ISC",
   "dependencies": {
     "chalk": "^5.0.1",
@@ -19,5 +31,6 @@
     "fs-extra": "^10.1.0",
     "inquirer": "^8.2.2",
     "prettier": "^2.6.2"
-  }
+  },
+  "devDependencies": {}
 }
