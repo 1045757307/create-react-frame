@@ -9,5 +9,12 @@ export default ({ currentUser }) => {
   );
   const code = ejs.render(file.toString(), { currentUser });
   // 格式化
-  return prettier.format(code, { parser: 'babel' });
+  return prettier.format(code, {
+    useTabs: true,
+    singleQuote: true,
+    // jsxSingleQuote: true,
+    arrowParens: 'avoid',
+    trailingComma: 'all',
+    parser: 'babel',
+  });
 };

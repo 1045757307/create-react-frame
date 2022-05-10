@@ -1,6 +1,6 @@
 {
   "name": "create-react-frame-z",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "使用命令行工具一键搭建基于creact-react-app封装的自定义框架",
   "main": "bin/index.js",
   "type": "module",
